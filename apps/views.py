@@ -22,6 +22,12 @@ class ListByCategoryView(ListView):
         context = super().get_context_data(**kwargs)
 
         pk = self.request.GET.get('pk')
+
+        if pk:
+            self.request.session['last_category_pk'] = pk
+        else:
+            pk = self.request.session.get('last_category_pk')
+
         query = self.request.GET.get('q', '').strip()
 
         if pk:
@@ -31,10 +37,7 @@ class ListByCategoryView(ListView):
 
         if query:
             if self.request.user.is_authenticated:
-                History.objects.get_or_create(
-                    user=self.request.user,
-                    request=query
-                )
+                History.objects.get_or_create(user=self.request.user, request=query)
 
             products = products.filter(
                 Q(title__icontains=query) | Q(description__icontains=query)
@@ -52,21 +55,13 @@ class HomeListView(ListView):
     context_object_name = 'products'
 
     def get_queryset(self):
+        queryset = super().get_queryset()
         query = self.request.GET.get('q', '').strip()
-        queryset = Product.objects.all()
 
         if query:
             if self.request.user.is_authenticated:
-                History.objects.get_or_create(
-                    user=self.request.user,
-                    request=query
-                )
-
-            queryset = queryset.filter(
-                Q(title__icontains=query) | Q(description__icontains=query)
-            ).distinct()
-
-        return queryset
+                History.objects.get_or_create(user=self.request.user, request=query)
+            return queryset.filter(Q(title__icontains=query) | Q(description__icontains=query)).distinct()
 
 
     def get_context_data(self, **kwargs):
@@ -85,10 +80,22 @@ class CategoryListView(ListView):
     template_name = 'category.html'
     context_object_name = 'products'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q', '').strip()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(user=self.request.user, request=query)
+            return queryset.filter(Q(title__icontains=query) | Q(description__icontains=query)).distinct()
+
+        return queryset
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context['categories'] = Category.objects.all()
+        context['search_query'] = self.request.GET.get('q', '').strip()
 
         return context
 
@@ -101,13 +108,29 @@ class AdminListView(ListView):
 class MarketListView(ListView):
     queryset = Product.objects.all()
     template_name = 'market.html'
+    context_object_name = 'products'
 
-    def get_context_data(self, *, object_list=..., **kwargs):
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q', '').strip()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(user=self.request.user, request=query)
+            return queryset.filter(Q(title__icontains=query) | Q(description__icontains=query)).distinct()
+
+        return queryset
+
+    def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['products'] = Product.objects.all()
         context['categories'] = Category.objects.all()
-        context['fav_ids'] = Favorite.objects.filter(user=self.request.user).values_list('product_id', flat=True)
+        context['search_query'] = self.request.GET.get('q', '').strip()
+
+        if self.request.user.is_authenticated:
+            context['fav_ids'] = Favorite.objects.filter(user=self.request.user).values_list('product_id', flat=True)
+        else:
+            context['fav_ids'] = []
 
         return context
 
@@ -304,8 +327,28 @@ class MarketByCategoryView(ListView):
 
         pk = self.request.GET.get('pk')
 
-        context['products'] = Product.objects.filter(category=pk)
+        if pk:
+            self.request.session['current_category_pk'] = pk
+        else:
+            pk = self.request.session.get('current_category_pk')
 
+        query = self.request.GET.get('q', '').strip()
+
+        if pk:
+            products = Product.objects.filter(category_id=pk)
+        else:
+            products = Product.objects.all()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(user=self.request.user, request=query)
+
+            products = products.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            ).distinct()
+
+        context['products'] = products
+        context['search_query'] = query
         return context
 
 
