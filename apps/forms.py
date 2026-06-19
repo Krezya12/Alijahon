@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import F
 from django.forms import ModelForm, CharField, Form
 
-from apps.models import User, Flow, Product, Transaction, Favorite, Order
+from apps.models import User, Flow, Product, Transaction, Favorite, Order, History
 
 
 class UserModelForm(ModelForm):
@@ -152,3 +152,8 @@ class OrderModelForm(ModelForm):
         model = Order
         fields = ['quantity', 'flow', 'full_name', 'phone_number', 'product', 'comment', 'status', 'delivery_date', 'city']
 
+
+class HistoryModelForm(ModelForm):
+    class Meta:
+        model = History
+        fields = ['user', 'request']

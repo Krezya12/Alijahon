@@ -149,3 +149,8 @@ class Favorite(Model):
     product = ForeignKey('Product', on_delete=CASCADE, related_name='favorites')
 
     created_at = DateTimeField(auto_now_add=True)
+
+class History(Model):
+    user = ForeignKey('User', on_delete=CASCADE, related_name='history')
+    request = CharField(max_length=255, default='')
+

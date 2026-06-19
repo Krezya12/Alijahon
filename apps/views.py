@@ -22,8 +22,26 @@ class ListByCategoryView(ListView):
         context = super().get_context_data(**kwargs)
 
         pk = self.request.GET.get('pk')
+        query = self.request.GET.get('q', '').strip()
 
-        context['products'] = Product.objects.filter(category=pk)
+        if pk:
+            products = Product.objects.filter(category_id=pk)
+        else:
+            products = Product.objects.all()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(
+                    user=self.request.user,
+                    request=query
+                )
+
+            products = products.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            ).distinct()
+
+        context['products'] = products
+        context['search_query'] = query
 
         return context
 
@@ -31,14 +49,33 @@ class ListByCategoryView(ListView):
 class HomeListView(ListView):
     queryset = Product.objects.all()
     template_name = 'home.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '').strip()
+        queryset = Product.objects.all()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(
+                    user=self.request.user,
+                    request=query
+                )
+
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            ).distinct()
+
+        return queryset
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         three_days_ago = timezone.now() - timedelta(days=3)
+        context['search_query'] = self.request.GET.get('q', '').strip()
         context['new_products'] = Product.objects.filter(created_at__gte=three_days_ago).order_by('-created_at')
         context['categories'] = Category.objects.all()
-        context['products'] = Product.objects.all()
 
         return context
 
@@ -46,12 +83,12 @@ class HomeListView(ListView):
 class CategoryListView(ListView):
     queryset = Product.objects.all()
     template_name = 'category.html'
+    context_object_name = 'products'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         context['categories'] = Category.objects.all()
-        context['products'] = Product.objects.all()
 
         return context
 
@@ -431,6 +468,37 @@ def get_districts_by_region(request):
     region_id = request.GET.get('region_id')
     city = City.objects.filter(region_id=region_id).values('id', 'title')
     return JsonResponse(list(city), safe=False)
+
+class ProductListView(ListView):
+    queryset = Product.objects.all()
+    template_name = 'home.html'
+    context_object_name = 'products'
+
+    def get_queryset(self):
+        query = self.request.GET.get('q', '').strip()
+        queryset = Product.objects.all()
+
+        if query:
+            if self.request.user.is_authenticated:
+                History.objects.get_or_create(
+                    user=self.request.user,
+                    request=query
+                )
+
+            queryset = queryset.filter(
+                Q(title__icontains=query) | Q(description__icontains=query)
+            ).distinct()
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['search_query'] = self.request.GET.get('q', '').strip()
+        context['categories'] = Category.objects.all()
+
+        return context
+
 
 
 

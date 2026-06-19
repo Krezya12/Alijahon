@@ -372,9 +372,8 @@
                     </li>
                 </ul>
 
-                <form action="/search" method="POST" class="search-box-header" autocomplete="off">
-                    <input type="hidden" name="csrfmiddlewaretoken" value="kVfU45CDvH7cx6govKk8CWl0lJQxAjfBTslmJSrvHRY13vxpmxTXgP9vdqTpfsdX">
-                    <input id="search-input" name="product" type="search" placeholder="Mahsulot qidirish...">
+                <form action="" method="GET" class="search-box-header" autocomplete="off">
+                    <input id="search-input" name="q" type="search" placeholder="Mahsulot qidirish..." value="{{ search_query|default:'' }}">
                     <button type="submit"><i class="icofont-search"></i></button>
                 </form>
 
