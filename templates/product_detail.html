@@ -1,0 +1,322 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block base %}
+    <body>
+
+    <!-- Хлебные крошки -->
+    <section class="py-3 bg-white border-bottom inner-header">
+        <div class="container">
+            <div class="row d-flex align-items-center">
+                <div class="col-lg-12">
+                    <div class="breadcrumbs">
+                        <p class="mb-0 m-0 text-muted">
+                            <a href="/"><span class="icofont icofont-ui-home"></span> Bosh sahifa</a>
+                            <span class="icofont icofont-thin-right mx-2 text-muted"></span>
+                            <a href="/category/sort-by?pk={{ product.category.id }}"
+                               class="text-dark font-weight-bold">{{ product.category.title }}</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Основной блок товара -->
+    <section class="py-5 shop-single bg-light">
+        <div class="container">
+            <div class="row">
+                <!-- Галерея изображений (Левая колонка) -->
+                <style>
+                    /* Контейнер всей галереи (главная + превью) */
+                    .product-gallery-isolated {
+                        width: 100%;
+                        max-width: 500px;
+                        margin: 0 auto;
+                    }
+
+                    /* Блок главного (большого) изображения */
+                    .main-image-box {
+                        width: 100%;
+                        height: 400px; /* Фиксированная высота белого фона */
+                        border: 1px solid #eaeaea;
+                        border-radius: 12px;
+                        overflow: hidden;
+                        background-color: #fff;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-bottom: 15px;
+                    }
+
+                    /* ИЗМЕНЕНИЯ ТУТ: Картинка теперь строго во всю высоту */
+                    .main-image-box img {
+                        height: 100% !important; /* Растягиваем строго до верхнего и нижнего краев */
+                        width: auto !important; /* Ширина подстроится автоматически, чтобы не сплющить фото */
+                        max-width: 100% !important; /* Защита: если картинка слишком широкая, она не вылезет за границы белого бокса */
+                        object-fit: cover; /* Если пропорции шире бокса, она аккуратно заполнит пространство */
+                        transition: opacity 0.2s ease-in-out;
+                    }
+
+                    /* Контейнер для маленьких картинок снизу */
+                    .thumbnails-wrapper {
+                        display: flex;
+                        gap: 10px;
+                        flex-wrap: wrap;
+                        justify-content: flex-start;
+                    }
+
+                    /* Сами маленькие плитки */
+                    .thumb-item {
+                        width: 70px;
+                        height: 70px;
+                        border: 2px solid #eaeaea;
+                        border-radius: 8px;
+                        overflow: hidden;
+                        background-color: #fff;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        padding: 2px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    /* Подсветка активной миниатюры */
+                    .thumb-item.active-thumb, .thumb-item:hover {
+                        border-color: #007bff;
+                    }
+
+                    .thumb-item img {
+                        max-width: 100%;
+                        max-height: 100%;
+                        object-fit: contain !important;
+                    }
+
+                    /* Адаптив под мобилки */
+                    @media (max-width: 576px) {
+                        .main-image-box {
+                            height: 280px; /* Высота белого фона на мобилках */
+                        }
+
+                        .thumb-item {
+                            width: 60px;
+                            height: 60px;
+                        }
+                    }
+                </style>
+
+                <div class="product-gallery-isolated">
+                    <div class="main-image-box">
+                        <img id="main-product-img"
+                             src="
+                                     {% if product.images.all %}{% with product.images.all|first as first_img %}{{ first_img.image.url }}{% endwith %}{% else %}{{ product.image.url }}{% endif %}"
+                             alt="{{ product.title }}">
+                    </div>
+
+                    <div class="thumbnails-wrapper">
+
+                        {% if product.images.all %}
+                            {% for img in product.images.all %}
+                                <div class="thumb-item {% if forloop.first %}active-thumb{% endif %}"
+                                     onclick="changeMainImage('{{ img.image.url }}', this)">
+                                    <img src="{{ img.image.url }}" alt="">
+                                </div>
+                            {% endfor %}
+
+                        {% elif product.image %}
+                            <div class="thumb-item active-thumb"
+                                 onclick="changeMainImage('{{ product.image.url }}', this)">
+                                <img src="{{ product.image.url }}" alt="">
+                            </div>
+                        {% else %}
+                            <div class="thumb-item active-thumb">
+                                <img src="{% static 'apps/nouser.png' %}" alt="No image">
+                            </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <!-- Информация и Форма заказа (Правая колонка) -->
+                <div class="col-md-6">
+                    <div class="shop-detail-right">
+                        <div class="border rounded shadow-sm bg-white p-4">
+                            <div class="product-name mb-3">
+                                <h2 class="font-weight-bold text-dark h3">{{ product.title }}</h2>
+                            </div>
+
+                            <div class="price-box mb-4">
+                                {% if flow %}
+                                    <h3 class="product-price text-danger m-0">{{ flow.discount }} so'm</h3>
+                                {% else %}
+                                    <h3 class="product-price text-danger m-0">{{ product.price }} so'm</h3>
+                                {% endif %}
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="product-variation">
+                                <form method="post" action="{% url 'order-create' %}" id="order-form">
+                                    {% csrf_token %}
+
+                                    <div class="form-group mb-3">
+                                        <label class="font-weight-bold text-secondary">Ism <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text"
+                                               placeholder="Ismingizni kiriting"
+                                               class="form-control form-control-lg"
+                                               name="full_name"
+                                               required
+                                               maxlength="50"
+                                               pattern="^[a-zA-Z0-9\s?-??-???????????]+$"
+                                               oninput="this.value = this.value.replace(/[^a-zA-Z0-9\s?-??-???????????]/g, '')"
+                                               title="Faqat harf va raqam kiritish mumkin">
+                                        <p class="help-block text-danger small"></p>
+                                    </div>
+
+                                    <div class="form-group mb-3">
+                                        <label class="font-weight-bold text-secondary">Telefon <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" placeholder="+998 (XX) XXX-XX-XX"
+                                               class="form-control form-control-lg" id="phone-mask-two" required
+                                               name="phone_number">
+                                        <p class="help-block text-danger small"></p>
+                                    </div>
+
+                                    {% if flow %}
+                                        <input type="text" hidden="hidden" name="flow" value="{{ flow.pk }}">
+                                    {% else %}
+                                        <input type="text" hidden="hidden" name="product" value="{{ product.pk }}">
+                                    {% endif %}
+
+                                    <div class="form-group mb-4">
+                                        <label for="quantity" class="font-weight-bold text-secondary">Soni :</label>
+                                        <select name="quantity" id="quantity" class="form-control custom-select">
+                                            <option value="1" selected>1 dona</option>
+                                            <option value="2">2 dona</option>
+                                            <option value="3">3 dona</option>
+                                            <option value="4">4 dona</option>
+                                            <option value="5">5 dona</option>
+                                            <option value="6">6 dona</option>
+                                            <option value="7">7 dona</option>
+                                            <option value="8">8 dona</option>
+                                            <option value="9">9 dona</option>
+                                        </select>
+                                    </div>
+
+                                    <button type="submit"
+                                            class="btn btn-success btn-lg btn-block py-3 font-weight-bold shadow-sm transition">
+                                        <i class="icofont icofont-shopping-cart mr-2"></i> Buyurtma berish
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Инфо блок о доставке -->
+                            <div class="delivery-info p-3 rounded mt-4 d-flex align-items-center text-muted">
+                                <i class="icofont icofont-delivery-time mr-3 text-primary h4 mb-0"></i>
+                                <span>Yetkazib berish O'zbekiston bo'ylab <strong>30 000 so'm</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Описание товара (Вкладки) -->
+    <section id="det" class="pb-5 pt-0 shop-single-detail bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="rounded shadow-sm bg-white border">
+                        <ul class="nav nav-pills p-3 border-b" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active font-weight-bold px-4" id="pills-home-tab" data-toggle="pill"
+                                   href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Batafsil
+                                    ma'lumot</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content p-4" id="pills-tabContent">
+                            <div class="tab-pane fade show active text-secondary" id="pills-home" role="tabpanel"
+                                 aria-labelledby="pills-home-tab" style="line-height: 1.7;">
+                                <p class="m-0">{{ product.description|linebreaks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал (Преимущества) -->
+    <footer class="bg-white border-top py-5">
+        <div class="container">
+            <div class="row text-center text-md-left">
+                <div class="col-md-4 mb-4 mb-md-0 border-right">
+                    <div class="px-3">
+                        <h5 class="font-weight-bold text-dark"><i
+                                class="icofont icofont-fast-delivery text-primary mr-2"></i> Tezkor yetkazish</h5>
+                        <p class="text-muted m-0 small">Buyurtmangiz O'zbekiston bo'ylab 2 kun ichida uyingizgacha
+                            yetqazib beriladi.</p>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4 mb-md-0 border-right">
+                    <div class="px-3">
+                        <h5 class="font-weight-bold text-dark"><i
+                                class="icofont icofont-credit-card text-primary mr-2"></i> To'lov turlari</h5>
+                        <p class="text-muted m-0 small">Buyurtmani Click, Payme orqali yoki mahsulotni qo'lingizga
+                            olganingizdan so'ng (Naqd/Karta) amalga oshiring.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="px-3">
+                        <h5 class="font-weight-bold text-dark"><i class="icofont icofont-badge text-primary mr-2"></i>
+                            100% Kafolat</h5>
+                        <p class="text-muted m-0 small">Sifatli mahsulotlar va ishonchli xizmat ko'rsatish tizimi.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Скрипты -->
+    <script src="{% static 'apps/jquery.min.js' %}"></script>
+    <script src="{% static 'apps/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'apps/select2.min.js' %}"></script>
+    <script src="{% static 'apps/owl.carousel.js' %}"></script>
+    <script src="{% static 'apps/custom.js' %}"></script>
+    <script src="{% static 'apps/hc-offcanvas-nav.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'apps/demo.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script>
+        function changeMainImage(imageUrl, thumbnailElement) {
+            // Находим главное изображение
+            var mainImg = document.getElementById('main-product-img');
+
+            if (mainImg) {
+                // Эффект легкого угасания при смене (опционально, для красоты)
+                mainImg.style.opacity = '0.3';
+
+                setTimeout(function () {
+                    // Меняем путь к картинке на тот, что передали из миниатюры
+                    mainImg.src = imageUrl;
+                    mainImg.style.opacity = '1';
+                }, 150);
+            }
+
+            // Убираем активный класс (синюю рамку) у всех миниатюр
+            var thumbs = document.querySelectorAll('.thumb-item');
+            thumbs.forEach(function (thumb) {
+                thumb.classList.remove('active-thumb');
+            });
+
+            // Добавляем синюю рамку текущей нажатой миниатюре
+            thumbnailElement.classList.add('active-thumb');
+        }
+    </script>
+
+    </body>
+
+
+{% endblock %}

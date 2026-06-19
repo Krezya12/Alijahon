@@ -1,0 +1,278 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block base %}
+
+    <div class="container dashboard-container">
+        <div class="row">
+
+
+            <style>
+                .sidebar-modern {
+                    background: white;
+                    border-radius: 20px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+                    overflow: hidden;
+                    position: sticky;
+                    top: 20px;
+                }
+
+                .user-profile-modern {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    padding: 30px 20px;
+                    text-align: center;
+                    position: relative;
+                }
+
+                .user-profile-modern::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+                    opacity: 0.4;
+                }
+
+                .user-avatar-modern {
+                    width: 100px;
+                    height: 100px;
+                    border-radius: 50%;
+                    border: 4px solid white;
+                    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+                    object-fit: cover;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .user-info-modern {
+                    color: white;
+                    margin-top: 15px;
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .user-info-modern h6 {
+                    font-size: 18px;
+                    font-weight: 700;
+                    margin-bottom: 8px;
+                }
+
+                .user-info-modern p {
+                    font-size: 13px;
+                    opacity: 0.95;
+                    margin-bottom: 4px;
+                }
+
+                .nav-modern {
+                    padding: 10px 0;
+                }
+
+                .nav-modern .nav-item {
+                    margin: 0;
+                }
+
+                .nav-modern .nav-link {
+                    color: #64748b;
+                    padding: 14px 24px;
+                    display: flex;
+                    align-items: center;
+                    font-weight: 500;
+                    font-size: 15px;
+                    border-left: 3px solid transparent;
+                    transition: all 0.3s ease;
+                }
+
+                .nav-modern .nav-link i {
+                    font-size: 20px;
+                    margin-right: 12px;
+                    width: 24px;
+                    text-align: center;
+                }
+
+                .nav-modern .nav-link:hover,
+                .nav-modern .nav-link.active {
+                    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+                    color: #667eea;
+                    border-left-color: #667eea;
+                }
+
+                @media (max-width: 768px) {
+                    .sidebar-modern {
+                        margin-bottom: 20px;
+                        position: static;
+                    }
+
+                    .user-profile-modern {
+                        padding: 20px 15px;
+                    }
+
+                    .user-avatar-modern {
+                        width: 80px;
+                        height: 80px;
+                    }
+
+                    .user-info-modern h6 {
+                        font-size: 16px;
+                    }
+
+                    .user-info-modern p {
+                        font-size: 12px;
+                    }
+
+                    .nav-modern .nav-link {
+                        padding: 12px 20px;
+                        font-size: 14px;
+                    }
+
+                    .nav-modern .nav-link i {
+                        font-size: 18px;
+                        margin-right: 10px;
+                    }
+                }
+            </style>
+
+            <div class="col-md-3 mb-4">
+                <div class="sidebar-modern">
+                    <div class="user-profile-modern">
+                        <img class="user-avatar-modern" src="{% static 'apps/nouser.png' %}" alt="">
+                        <div class="user-info-modern">
+                            <h6>{{ user.first_name }}</h6>
+                            <p>+{{ user.phone_number }}</p>
+                            <p></p>
+                        </div>
+                    </div>
+                    <ul class="nav nav-modern flex-column" id="myTab" role="tablist">
+
+                        <li class="nav-item">
+                            <a href="/admin-page" class="nav-link active" role="tab">
+                                <i class="icofont-ui-user"></i>
+                                <span>Mening kabinetim</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link " href="/admin-page/operator-page">
+                                <i class="icofont-money"></i>
+                                <span>Operator page</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link " href="/admin-page/market">
+                                <i class="icofont-shopping-cart"></i>
+                                <span>Market</span>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="/admin-page/requests" class="nav-link ">
+                                <i class="icofont-list"></i>
+                                <span>So'rovnomalar</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/admin-page/urls">
+                                <i class="icofont-link"></i>
+                                <span>Havolalar</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/admin-page/stats" class="nav-link ">
+                                <i class="icofont-chart-bar-graph"></i>
+                                <span>Statistika</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/admin-page/competition">
+                                <i class="icofont-trophy-alt"></i>
+                                <span>Konkurs</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/admin-page/withdraw">
+                                <i class="icofont-money"></i>
+                                <span>To'lov</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/profile/referral">
+                                <i class="icofont-users-alt-4"></i>
+                                <span>Referal</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link " href="/profile/settings">
+                                <i class="icofont-ui-settings"></i>
+                                <span>Sozlamalar</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            {% block content %}
+
+
+            {% endblock %}
+
+        </div>
+    </div>
+
+    <script>
+        let isApiKeyVisible = false;
+
+        function toggleApiKey() {
+            const displayElement = document.getElementById('apiKeyDisplay');
+            const actualElement = document.getElementById('apiKeyActual');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            isApiKeyVisible = !isApiKeyVisible;
+
+            if (isApiKeyVisible) {
+                displayElement.style.display = 'none';
+                actualElement.style.display = 'block';
+                toggleIcon.className = 'icofont-eye-blocked toggle-eye';
+            } else {
+                displayElement.style.display = 'block';
+                actualElement.style.display = 'none';
+                toggleIcon.className = 'icofont-eye toggle-eye';
+            }
+        }
+
+        function copyApiKey() {
+            const apiKey = 'Wsz7dVAXCaorq2tBJ6V5F416NKqlONW2';
+            navigator.clipboard.writeText(apiKey).then(() => {
+                alert('API Key nusxa olindi!');
+            });
+        }
+    </script>
+
+
+
+
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="{% static 'apps/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'apps/custom.js' %}"></script>
+    <!-- Contact form JavaScript -->
+    <!-- Do not edit these files! In order to set the email address and subject line for the contact form go to the bin/contact_me.php file. -->
+    <script src="{% static 'apps/jqBootstrapValidation.js' %}"></script>
+    <script src="{% static 'apps/contact_me.js' %}"></script>
+    <!-- Owl Carousel -->
+    <script src="{% static 'apps/owl.carousel.js' %}"></script>
+
+
+    <script defer
+            src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447"
+            integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ=="
+            data-cf-beacon='{"version":"2024.11.0","token":"72b499923c304ca590d917e3955e9593","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}'
+            crossorigin="anonymous"></script>
+    </body>
+    </html>
+
+{% endblock %}

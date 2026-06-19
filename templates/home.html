@@ -1,0 +1,376 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block base %}
+
+    <!-- Стили для главной страницы -->
+    <style>
+        /* --- HERO BANNER --- */
+        .hero-section {
+            margin-bottom: 40px;
+        }
+
+        .banner-item img {
+            object-fit: cover;
+            max-height: 480px;
+            width: 100%;
+        }
+
+        /* --- CATEGORIES SECTION --- */
+        .category-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s ease;
+            border: 1px solid #f1f5f9;
+            height: 100%;
+        }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+            border-color: #3b82f6;
+        }
+
+        .category-image-wrapper {
+            width: 75px;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border-radius: 50%;
+            padding: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .category-card:hover .category-image-wrapper {
+            background-color: #eff6ff;
+        }
+
+        .category-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .category-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+
+        .category-card:hover .category-title {
+            color: #3b82f6;
+        }
+
+        /* --- PRODUCT SECTIONS --- */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: #3b82f6;
+        }
+
+        .view-all-link {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .view-all-link:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        /* --- PRODUCT CARD --- */
+        .product-card {
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+            border-color: #cbd5e1;
+        }
+
+        .product-image-link {
+            display: block;
+            overflow: hidden;
+            background-color: #f8fafc;
+            position: relative;
+            padding-top: 100%; /* Соотношение сторон 1:1 */
+        }
+
+        .product-img-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+
+        .product-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-img-container img {
+            transform: scale(1.06);
+        }
+
+        .product-info {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            height: 40px; /* Фиксация высоты для выравнивания */
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .product-title a {
+            color: #334155;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .product-title a:hover {
+            color: #3b82f6;
+        }
+
+        .product-price {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #10b981;
+            margin: 0;
+            margin-top: auto;
+        }
+
+        /* Адаптивность для мобильных экранов */
+        @media (max-width: 576px) {
+            .category-image-wrapper {
+                width: 60px;
+                height: 60px;
+            }
+
+            .category-title {
+                font-size: 0.8rem;
+            }
+
+            .product-info {
+                padding: 12px;
+            }
+
+            .product-title {
+                font-size: 0.85rem;
+                height: 36px;
+            }
+
+            .product-price {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+
+    <!-- Hero Banner Section -->
+    <div class="hero-section">
+        <div class="container-fluid px-0">
+            <!-- Очищенный контейнер для слайдера, плагин сам создаст нужную разметку -->
+            <div id="hero-carousel" class="owl-carousel owl-theme">
+                <div class="item banner-item">
+                    <img class="img-fluid" src="/media/banners/slider2.png" alt="Banner 1">
+                </div>
+                <div class="item banner-item">
+                    <img class="img-fluid" src="/media/banners/slider1.png" alt="Banner 2">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories Grid Section -->
+    <section class="categories-section py-4">
+        <div class="container">
+            <div class="row g-3 g-md-4">
+                {% for ctg in categories %}
+                    <div class="col-4 col-sm-3 col-md-3 col-lg-2">
+                        <a href="{% url 'product_by_category' %}?pk={{ ctg.pk }}" class="category-card">
+                            <div class="category-image-wrapper">
+                                <img class="category-image" src="/media/{{ ctg.logo }}" alt="{{ ctg.title }}"
+                                     loading="lazy">
+                            </div>
+                            <h6 class="category-title">{{ ctg.title }}</h6>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Best Sellers Section -->
+    <section class="products-section py-5 bg-light">
+        <div class="container">
+            <div class="section-header mb-4">
+                <h2 class="section-title">Eng ko'p sotiladigan</h2>
+                <a href="/category" class="view-all-link">
+                    Barchasini ko'rish <i class="fa-solid fa-angle-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="row g-3 g-md-4">
+                {% for product in products %}
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="product-card">
+                            <a href="{% url 'product-detail' product.pk %}" class="product-image-link">
+                                <div class="product-img-container">
+                                    <img src="{{ product.images.all.first.image.url }}" alt="{{ product.title }}"
+                                         loading="lazy">
+                                </div>
+                            </a>
+                            <div class="product-info">
+                                <h6 class="product-title">
+                                    <a href="{% url 'product-detail' product.pk %}">
+                                        {{ product.title }}
+                                    </a>
+                                </h6>
+                                <p class="product-price">{{ product.price }} so'm</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- New Products Section -->
+    <section class="products-section py-5">
+        <div class="container">
+            <div class="section-header mb-4">
+                <h2 class="section-title">Yangi mahsulotlar</h2>
+                <a href="/category" class="view-all-link">
+                    Barchasini ko'rish <i class="fa-solid fa-angle-right ms-1"></i>
+                </a>
+            </div>
+
+            <!-- Тоже чистая разметка для слайдера категорий -->
+            <div id="new-products-carousel" class="owl-carousel owl-theme">
+                {% for new_product in new_products %}
+                    <div class="item p-2">
+                        <div class="product-card d-flex flex-column h-100"
+                             style="background: #fff; border-radius: 12px; overflow: hidden;">
+                            <a href="{% url 'product-detail' new_product.pk %}" class="product-image-link">
+                                <div class="product-img-container" style="height: 200px; overflow: hidden;">
+                                    <img src="{{ new_product.images.all.first.image.url }}"
+                                         alt="{{ new_product.title }}" loading="lazy"
+                                         style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </a>
+
+                            <div class="product-info d-flex flex-column flex-grow-1 p-3">
+                                <h6 class="product-title"
+                                    style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 44px; max-height: 44px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.4;">
+                                    <a href="{% url 'product-detail' new_product.pk %}"
+                                       class="text-decoration-none text-dark fw-semibold">
+                                        {{ new_product.title }}
+                                    </a>
+                                </h6>
+
+                                <p class="product-price mt-auto mb-0 fw-bold text-primary" style="font-size: 1.1rem;">
+                                    {{ new_product.price|floatformat:0 }} so'm
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Подключение скрипта карусели -->
+    <script src="{% static 'apps/owl.carousel.js' %}"></script>
+
+    <!-- Инициализация слайдеров -->
+    <script>
+        $(document).ready(function () {
+            // Инициализация главного баннера
+            $("#hero-carousel").owlCarousel({
+                items: 1,
+                loop: true,
+                autoplay: true,
+                autoplayTimeout: 5000,
+                nav: true,
+                dots: true,
+                navText: ["<i class='fa-solid fa-angle-left'></i>", "<i class='fa-solid fa-angle-right'></i>"]
+            });
+
+            // Инициализация карусели новых товаров
+            $("#new-products-carousel").owlCarousel({
+                loop: false,
+                margin: 15,
+                nav: true,
+                dots: false,
+                navText: ["<i class='fa-solid fa-angle-left'></i>", "<i class='fa-solid fa-angle-right'></i>он"],
+                responsive: {
+                    0: {items: 2},
+                    768: {items: 3},
+                    1024: {items: 4}
+                }
+            });
+        });
+    </script>
+{% endblock %}
